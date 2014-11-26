@@ -23,7 +23,12 @@ public class MyFirstServlet extends HttpServlet {
 		}
 		else
 		{
-			PrintWriter printMessage = response.getWriter()
+			try {
+				PrintWriter printMessage = response.getWriter();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 			
 	}
