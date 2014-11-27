@@ -1,6 +1,7 @@
 package helper;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,8 +23,9 @@ public class EmployeeAccess {
 	 */
 	private Map<TransactionDetail, String> transactionDetail = new HashMap<TransactionDetail, String>();
 
+	@SuppressWarnings("rawtypes")
 	public Map activity(String uid, String rewardId,
-			Map<String, Integer> priceMap) {
+			Map<Integer, String> priceMap) {
 		Connection connection = DBconnection.getInstance();
 		Statement stmt;
 		String value = null;
@@ -36,6 +38,7 @@ public class EmployeeAccess {
 				if (rewardId.equals(rewarId1)) {
 					value = rs.getString("price");
 					break;
+
 				}
 			}
 
@@ -45,7 +48,7 @@ public class EmployeeAccess {
 		}
 		if (StringUtils.isNotBlank(value)) {
 			Integer sum = null;
-			Collection<Integer> priceList = priceMap.values();
+			Collection<Integer> priceList = priceMap.keySet();
 			Iterator<Integer> itr = priceList.iterator();
 			while (itr.hasNext()) {
 				sum = sum + itr.next();
@@ -61,6 +64,28 @@ public class EmployeeAccess {
 				transactionDetail.put(TransactionDetail.NEWREWARD,
 						String.valueOf(Integer.getInteger(value) - sum));
 			}
+			try {
+				PreparedStatement statement = connection
+						.prepareStatement("INSERT INTO Sales (rewardID, , "
+								+ "empID, comodity,price)" + " VALUES(?,?,?,?)");
+				int i = 1;
+				for (Integer integer : priceList) {
+					statement.setString(i, rewardId);
+					statement.setString(i, uid);
+					statement.setString(i, priceMap.get(integer));
+					statement.setInt(i, integer);
+					statement.addBatch();
+					i++;
+
+				}
+				statement.executeBatch();
+				connection.commit();
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		} else {
 
 		}
